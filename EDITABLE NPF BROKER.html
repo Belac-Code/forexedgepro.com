@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — ForexedgePro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="brand.css"/>
+  <style>
+    /* ─── LAYOUT ───────────────────────────────── */
+    .app { display: flex; min-height: 100vh; }
+
+    /* ─── SIDEBAR ──────────────────────────────── */
+    .sidebar {
+      width: 260px; flex-shrink: 0;
+      background: rgba(13,34,64,0.95);
+      border-right: 1px solid var(--glass-border);
+      display: flex; flex-direction: column;
+      padding: 1.5rem 0; position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 200; transition: transform 0.3s ease;
+    }
+    .sidebar-header { padding: 0 1.5rem 1.5rem; border-bottom: 1px solid var(--glass-border); margin-bottom: 1rem; }
+    .nav-menu { flex: 1; padding: 0 0.75rem; }
+    .nav-item {
+      display: flex; align-items: center; gap: 0.85rem;
+      padding: 0.8rem 0.9rem; border-radius: 10px; margin-bottom: 0.2rem;
+      color: var(--slate); text-decoration: none; font-size: 0.875rem; font-weight: 500;
+      cursor: pointer; transition: all 0.18s; position: relative;
+    }
+    .nav-item:hover { background: var(--glass); color: var(--slate-light); }
+    .nav-item.active { background: var(--emerald-glow); color: var(--emerald); border: 1px solid rgba(16,185,129,0.2); }
+    .nav-item.active i { color: var(--emerald); }
+    .nav-item i { width: 18px; text-align: center; font-size: 0.9rem; }
+    .nav-badge {
+      margin-left: auto; background: var(--emerald); color: var(--navy);
+      font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 999px;
+    }
+    .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--glass-border); }
+    .user-pill {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 0.9rem; border-radius: 10px; background: var(--glass); border: 1px solid var(--glass-border);
+    }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--emerald), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Sora', sans-serif; font-weight: 700; font-size: 0.75rem; color: var(--navy);
+    }
+    .user-info .un { font-size: 0.8rem; font-weight: 600; }
+    .user-info .ue { font-size: 0.7rem; color: var(--slate); }
+    .logout-btn { margin-left: auto; color: var(--slate); cursor: pointer; font-size: 0.85rem; background: none; border: none; padding: 0; transition: color 0.2s; }
+    .logout-btn:hover { color: var(--red); }
+
+    /* ─── MOBILE NAV ───────────────────────────── */
+    .mobile-nav {
+      display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+      background: rgba(10,25,47,0.95); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 1rem 1.25rem; align-items: center; justify-content: space-between;
+    }
+    .hamburger { background: none; border: none; color: var(--white); font-size: 1.25rem; cursor: pointer; padding: 0.25rem; }
+    .mobile-overlay {
+      display: none; position: fixed; inset: 0; z-index: 199;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+    }
+    .mobile-overlay.open { display: block; }
+
+    @media (max-width: 1024px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .mobile-nav { display: flex; }
+      .main { margin-left: 0 !important; padding-top: 5rem; }
+    }
+
+    /* ─── MAIN CONTENT ─────────────────────────── */
+    .main { flex: 1; margin-left: 260px; padding: 2rem 2.5%; min-width: 0; }
+
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .greeting h1 { font-family: 'Sora', sans-serif; font-size: clamp(1.3rem, 2.5vw, 1.75rem); font-weight: 700; }
+    .greeting p { font-size: 0.82rem; color: var(--slate); margin-top: 0.2rem; }
+    .top-actions { display: flex; gap: 0.75rem; align-items: center; }
+    .notif-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--slate-light); cursor: pointer; transition: all 0.2s; font-size: 0.9rem;
+    }
+    .notif-btn:hover { border-color: var(--emerald); color: var(--emerald); }
+
+    /* ─── WALLET CARD ──────────────────────────── */
+    .wallet-card {
+      background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(20,184,166,0.08) 50%, rgba(13,34,64,0.9) 100%);
+      border: 1px solid rgba(16,185,129,0.25);
+      backdrop-filter: blur(24px); border-radius: 20px; padding: 2rem;
+      margin-bottom: 1.5rem; position: relative; overflow: hidden;
+    }
+    .wallet-card::before {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(16,185,129,0.12), transparent 70%);
+    }
+    .wc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+    .wc-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--slate); margin-bottom: 0.3rem; }
+    .wc-balance { font-family: 'Sora', sans-serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; }
+    .wc-balance sup { font-size: 1.2rem; font-weight: 600; vertical-align: super; color: var(--slate-light); }
+    .wc-badge {
+      padding: 0.35rem 0.8rem; border-radius: 999px;
+      background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3);
+      color: var(--emerald); font-size: 0.72rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .wc-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    @media (max-width: 500px) { .wc-metrics { grid-template-columns: 1fr 1fr; } }
+    .wc-metric { }
+    .wc-metric .lbl { font-size: 0.7rem; color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; }
+    .wc-metric .val { font-family: 'Sora', sans-serif; font-size: 1.1rem; font-weight: 700; }
+    .wc-metric .val.green { color: var(--emerald); }
+
+    /* ─── GRID ─────────────────────────────────── */
+    .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+    @media (max-width: 680px) { .dash-grid { grid-template-columns: 1fr; } }
+
+    /* ─── CARDS ────────────────────────────────── */
+    .card {
+      background: rgba(13,34,64,0.7); border: 1px solid var(--glass-border);
+      backdrop-filter: blur(16px); border-radius: 16px; padding: 1.5rem;
+    }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    .card-title { font-family: 'Sora', sans-serif; font-size: 0.9rem; font-weight: 600; }
+    .card-icon { width: 34px; height: 34px; border-radius: 8px; background: var(--emerald-glow); border: 1px solid rgba(16,185,129,0.2); display: flex; align-items: center; justify-content: center; color: var(--emerald); font-size: 0.82rem; }
+
+    /* ─── LIVE MARKET ──────────────────────────── */
+    .live-badge { display: flex; align-items: center; gap: 0.4rem; font-size: 0.68rem; font-weight: 700; color: var(--emerald); text-transform: uppercase; letter-spacing: 0.1em; }
+    .btc-display { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+    .btc-logo { width: 44px; height: 44px; border-radius: 50%; background: rgba(247,147,26,0.15); border: 1px solid rgba(247,147,26,0.2); display: flex; align-items: center; justify-content: center; color: #f7931a; font-size: 1.3rem; flex-shrink: 0; }
+    .btc-meta .nm { font-family: 'Sora', sans-serif; font-size: 0.85rem; font-weight: 600; }
+    .btc-meta .sym { font-size: 0.72rem; color: var(--slate); }
+    .btc-price-big { font-family: 'Sora', sans-serif; font-size: 1.65rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .btc-price-big span { font-size: 0.85rem; color: var(--slate); font-weight: 400; }
+    .btc-change-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; }
+    .chg-pill { padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 700; font-size: 0.75rem; }
+    .chg-pill.up   { background: rgba(16,185,129,0.15); color: var(--emerald); }
+    .chg-pill.down { background: rgba(248,113,113,0.12); color: var(--red); }
+    .btc-sub { font-size: 0.72rem; color: var(--slate); }
+    .refresh-btn { background: none; border: 1px solid var(--glass-border); border-radius: 7px; padding: 0.3rem 0.65rem; color: var(--slate); font-size: 0.72rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.35rem; }
+    .refresh-btn:hover { border-color: var(--emerald); color: var(--emerald); }
+    .refresh-btn.spinning i { animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .countdown-bar { width: 100%; height: 3px; background: var(--glass-border); border-radius: 2px; margin-top: 1rem; overflow: hidden; }
+    .countdown-fill { height: 100%; background: linear-gradient(90deg, var(--emerald), var(--teal)); border-radius: 2px; transition: width 1s linear; }
+
+    /* ─── STATS GRID ───────────────────────────── */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+    .stat-item { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 10px; padding: 1rem; }
+    .stat-item .s-icon { color: var(--emerald); font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .stat-item .s-val { font-family: 'Sora', sans-serif; font-size: 1.2rem; font-weight: 700; }
+    .stat-item .s-lbl { font-size: 0.7rem; color: var(--slate); margin-top: 0.15rem; }
+
+    /* ─── ACTIONS ──────────────────────────────── */
+    .actions-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    @media (max-width: 400px) { .actions-row { grid-template-columns: 1fr; } }
+
+    .action-card {
+      border-radius: 14px; padding: 1.5rem; cursor: pointer; transition: all 0.25s;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem;
+    }
+    .action-card.solid {
+      background: linear-gradient(135deg, var(--emerald), var(--teal));
+      border: none; color: var(--navy);
+    }
+    .action-card.solid:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(16,185,129,0.4); }
+    .action-card.ghost {
+      background: var(--glass); border: 1px solid var(--emerald);
+      color: var(--emerald);
+    }
+    .action-card.ghost:hover { background: var(--emerald-glow); transform: translateY(-3px); }
+    .action-card:active { transform: translateY(-1px); }
+    .ac-icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .solid .ac-icon { background: rgba(10,25,47,0.2); color: var(--navy); }
+    .ghost .ac-icon { background: var(--emerald-glow); color: var(--emerald); }
+    .ac-title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1rem; }
+    .ac-sub { font-size: 0.75rem; opacity: 0.75; }
+
+    /* ─── ACTIVITY ─────────────────────────────── */
+    .activity-list { display: flex; flex-direction: column; gap: 0.1rem; }
+    .act-item { display: flex; align-items: center; gap: 0.9rem; padding: 0.8rem 0; border-bottom: 1px solid var(--glass-border); }
+    .act-item:last-child { border-bottom: none; }
+    .act-icon { width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
+    .act-icon.dep  { background: rgba(16,185,129,0.12); color: var(--emerald); }
+    .act-icon.with { background: rgba(248,113,113,0.1); color: var(--red); }
+    .act-icon.earn { background: rgba(20,184,166,0.12); color: var(--teal); }
+    .act-desc { flex: 1; }
+    .act-desc .ad-name { font-size: 0.82rem; font-weight: 500; }
+    .act-desc .ad-date { font-size: 0.7rem; color: var(--slate); margin-top: 0.1rem; }
+    .act-amt { font-family: 'Sora', sans-serif; font-size: 0.85rem; font-weight: 600; }
+    .act-amt.up { color: var(--emerald); }
+    .act-amt.dn { color: var(--red); }
+
+    /* ─── CHART PLACEHOLDER ────────────────────── */
+    .chart-placeholder {
+      height: 120px; border-radius: 10px;
+      background: var(--glass); border: 1px dashed var(--glass-border);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 0.4rem; margin-top: 0.5rem;
+      color: var(--slate); font-size: 0.78rem;
+    }
+
+    /* ─── TOAST ─────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
+      background: rgba(13,34,64,0.95); border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px); border-radius: 12px;
+      padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;
+      font-size: 0.85rem; box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+      transform: translateY(100px); opacity: 0; transition: all 0.3s ease;
+      max-width: 320px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast i { color: var(--emerald); font-size: 1rem; }
+
+    /* ─── MODAL ─────────────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--navy-mid); border: 1px solid var(--glass-border);
+      border-radius: 20px; padding: 2rem; width: 100%; max-width: 380px;
+      animation: fadeInUp 0.3s ease;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .modal-title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1.1rem; }
+    .modal-close { background: none; border: none; color: var(--slate); cursor: pointer; font-size: 1.1rem; transition: color 0.2s; }
+    .modal-close:hover { color: var(--white); }
+    .modal-field { margin-bottom: 1rem; }
+    .modal-field label { display: block; font-size: 0.78rem; color: var(--slate-light); margin-bottom: 0.4rem; }
+    .modal-field input {
+      width: 100%; padding: 0.8rem 1rem; border-radius: 9px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
+      color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none;
+      transition: border-color 0.2s;
+    }
+    .modal-field input:focus { border-color: var(--emerald); }
+    .modal-note { font-size: 0.75rem; color: var(--slate); margin-bottom: 1.25rem; line-height: 1.5; }
+    .modal-btn {
+      width: 100%; padding: 0.9rem; border-radius: 10px; border: none;
+      font-family: 'Sora', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-btn.add { background: linear-gradient(135deg, var(--emerald), var(--teal)); color: var(--navy); }
+    .modal-btn.add:hover { box-shadow: 0 6px 20px rgba(16,185,129,0.4); }
+    .modal-btn.wd  { background: var(--glass); border: 1px solid var(--emerald); color: var(--emerald); }
+    .modal-btn.wd:hover  { background: var(--emerald-glow); }
+
+    @media (max-width: 1280px) { .main { padding: 2rem 1.5%; } }
+    @media (max-width: 768px)  { .main { padding: 1.5rem 4%; } }
+  </style>
+</head>
+
+
+<body>
+<div class="app">
+
+  <!-- MOBILE TOP NAV -->
+  <div class="mobile-nav">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <i class="fa fa-bars" id="ham-icon"></i>
+    </button>
+    <a href="#" class="logo">
+      <div class="logo-icon" style="font-weight: bolder">FXP</div>
+      <div><span class="logo-name" style="font-size:0.85rem">ForexedgePro</span></div>
+    </a>
+    <div class="notif-btn" onclick="toggleNotifs()"><i class="fa fa-bell"></i></div>
+  </div>
+
+  <!-- OVERLAY -->
+  <div class="mobile-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- NOTIFICATION PANEL -->
+  <div id="notif-panel" style="position:fixed; right:-320px; top:0; width:300px; height:100%; background:var(--navy-mid); border-left:1px solid var(--glass-border); z-index:1000; transition:0.3s; padding:1.5rem; box-shadow:-10px 0 30px rgba(0,0,0,0.5);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+        <h3 style="font-family:'Sora'; font-size:1.1rem;">Notifications</h3>
+        <button onclick="toggleNotifs()" style="background:none; border:none; color:var(--slate); cursor:pointer;"><i class="fa fa-xmark"></i></button>
+    </div>
+    <div class="activity-list">
+        <div class="act-item">
+            <div class="act-icon earn"><i class="fa fa-calendar-check"></i></div>
+            <div class="act-desc">
+                <div class="ad-name">Account Created</div>
+                <div class="ad-date" id="creation-date-notif">April 30, 2026</div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">FXP</div>
+        <div>
+          <span class="logo-name">Forexedge</span>
+          <span class="logo-tag">Pro</span>
+        </div>
+      </div>
+    </div>
+    <nav class="nav-menu">
+      <a class="nav-item active" onclick="showPage('home')" id="nav-home"><i class="fa fa-house"></i> Home</a>
+      <a class="nav-item" onclick="showPage('wallet')" id="nav-wallet"><i class="fa fa-wallet"></i> Wallet <span class="nav-badge">0</span></a>
+      <a class="nav-item" onclick="showPage('stats')" id="nav-stats"><i class="fa fa-chart-bar"></i> Statistics</a>
+      <a class="nav-item" onclick="showPage('settings')" id="nav-settings"><i class="fa fa-gear"></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">US</div>
+        <div class="user-info">
+          <div class="un">USER</div>
+          <div class="ue">user@gmail.com</div>
+        </div>
+        <button class="logout-btn" onclick="logout()" title="Logout"><i class="fa fa-arrow-right-from-bracket"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="top-bar">
+      <div class="greeting">
+        <h1>Welcome back 👋</h1>
+        <p id="date-display">Loading date…</p>
+      </div>
+      <div class="top-actions">
+        <div class="notif-btn" onclick="toggleNotifs()"><i class="fa fa-bell"></i></div>
+        <button class="btn-nav" onclick="logout()" style="background:var(--glass); border:1px solid var(--glass-border); padding:0.5rem 1rem; border-radius:8px; color:white; cursor:pointer;">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- HOME PAGE -->
+    <section id="page-home" class="page-content">
+        <!-- WALLET CARD -->
+        <div class="wallet-card">
+          <div class="wc-top">
+            <div>
+              <div class="wc-label">Total Balance</div>
+              <div class="wc-balance"><sup>$</sup>0.00</div>
+            </div>
+            <div class="wc-badge"><span class="pulse-dot"></span> Active</div>
+          </div>
+          <div class="wc-metrics">
+            <div class="wc-metric"><div class="lbl">Daily Earnings</div><div class="val green">$0.00</div></div>
+            <div class="wc-metric"><div class="lbl">Total Earned</div><div class="val green">$0.00</div></div>
+            <div class="wc-metric"><div class="lbl">Available Withdraw</div><div class="val">$0.00</div></div>
+          </div>
+        </div>
+
+        <div class="actions-row">
+          <div class="action-card solid" onclick="openModal('add')">
+            <div class="ac-icon"><i class="fa fa-plus"></i></div>
+            <div class="ac-title">Add Funds</div>
+            <div class="ac-sub">Deposit to your wallet</div>
+          </div>
+          <div class="action-card ghost" onclick="openModal('wd')">
+            <div class="ac-icon"><i class="fa fa-arrow-up-from-bracket"></i></div>
+            <div class="ac-title">Withdraw</div>
+            <div class="ac-sub">Transfer to your account</div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Live Market</span>
+              <div class="live-badge"><span class="pulse-dot"></span> LIVE</div>
+            </div>
+            <div class="btc-display">
+              <div class="btc-logo"><i class="fa-brands fa-bitcoin"></i></div>
+              <div class="btc-meta"><div class="nm">Bitcoin</div><div class="sym">BTC / USD</div></div>
+            </div>
+            <div class="btc-price-big" id="btc-price"><span>$</span>—</div>
+            <div class="btc-change-row">
+              <span class="chg-pill up" id="btc-pill">—</span>
+              <button class="refresh-btn" onclick="fetchBTC(true)" id="refresh-btn"><i class="fa fa-arrows-rotate"></i> Refresh</button>
+            </div>
+            <div class="countdown-bar"><div class="countdown-fill" id="cd-fill" style="width:100%"></div></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Recent Activity</span>
+              <div class="card-icon"><i class="fa fa-clock-rotate-left"></i></div>
+            </div>
+            <div class="activity-list">
+              <div class="act-item">
+                <div class="act-icon earn"><i class="fa fa-star"></i></div>
+                <div class="act-desc"><div class="ad-name">Account Created</div><div class="ad-date"> By Admin </div></div>
+                <span class="act-amt up">— </span>
+              </div>
+            </div>
+          </div>
+        </div>
+    </section>
+
+    <!-- WALLET PAGE (Placeholder) -->
+    <section id="page-wallet" class="page-content" style="display:none;">
+        <div class="card">
+            <h2 style="font-family:'Sora'; margin-bottom:1rem;">My Wallet</h2>
+            <p style="color:var(--slate)">Manage your assets and transaction history here.</p>
+            <div class="chart-placeholder" style="height:200px; margin-top:2rem;">
+                <i class="fa fa-wallet" style="font-size:2rem; opacity:0.2;"></i>
+                <span>Wallet Details - Coming Soon</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS PAGE (Placeholder) -->
+    <section id="page-stats" class="page-content" style="display:none;">
+        <div class="card">
+            <h2 style="font-family:'Sora'; margin-bottom:1rem;">Analytics</h2>
+            <div class="stats-grid">
+                <div class="stat-item"><div class="s-val">20%</div><div class="s-lbl">Growth</div></div>
+                <div class="stat-item"><div class="s-val">$50</div><div class="s-lbl">Profit</div></div>
+                <div class="stat-item"><div class="s-val">10%</div><div class="s-lbl">Growth</div></div>
+                <div class="stat-item"><div class="s-val">$25</div><div class="s-lbl">Profit</div></div>
+                <div class="stat-item"><div class="s-val">50%</div><div class="s-lbl">Growth</div></div>
+                <div class="stat-item"><div class="s-val">$75</div><div class="s-lbl">Profit</div></div>
+                <div class="stat-item"><div class="s-val">100%</div><div class="s-lbl">Growth</div></div>
+                <div class="stat-item"><div class="s-val">$100</div><div class="s-lbl">Profit</div></div>
+           
+           
+              </div>
+        </div>
+    </section>
+
+    <!-- SETTINGS PAGE (Placeholder) -->
+    <section id="page-settings" class="page-content" style="display:none;">
+        <div class="card">
+            <h2 style="font-family:'Sora'; margin-bottom:1rem;">Account Settings</h2>
+            <div class="modal-field">
+                <label>Display Name</label>
+                <input type="text" value="User Name">
+            </div>
+            <button class="modal-btn add" style="width:auto; padding:0.8rem 2rem;">Save Profile</button>
+        </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- MODALS REMAIN THE SAME... -->
+<div class="modal-overlay" id="modal-add">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Add Funds</span>
+      <button class="modal-close" onclick="closeModal('add')"><i class="fa fa-xmark"></i></button>
+    </div>
+    <div class="modal-field"><label>wallet address</label><input type="text" placeholder="wallet address"/></div>
+    <button class="modal-btn add" onclick="submitModal('add')">Deposit</button>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-wd">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Withdraw</span>
+      <button class="modal-close" onclick="closeModal('wd')"><i class="fa fa-xmark"></i></button>
+    </div>
+    <div class="modal-field"><label>Amount (USD)</label><input type="number" placeholder="0.00"/></div>
+    <button class="modal-btn wd" onclick="submitModal('wd')">Withdraw</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="fa fa-circle-check"></i><span id="toast-msg">Done.</span></div>
+
+<script>
+  // ── Navigation Logic (The Fix)
+  function showPage(pageId) {
+    // Hide all pages
+    document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
+    // Show selected page
+    document.getElementById('page-' + pageId).style.display = 'block';
+    
+    // Update Nav Active State
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.getElementById('nav-' + pageId).classList.add('active');
+    
+    closeNav(); // Close mobile sidebar if open
+  }
+
+  // ── Notification Toggle
+  function toggleNotifs() {
+    const panel = document.getElementById('notif-panel');
+    const isVisible = panel.style.right === '0px';
+    panel.style.right = isVisible ? '-320px' : '0px';
+  }
+
+  // ── Date Display
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  document.getElementById('date-display').textContent = dateStr;
+  document.getElementById('creation-date-notif').textContent = dateStr;
+
+  // ── Sidebar toggle
+  function toggleSidebar() {
+    const sb = document.getElementById('sidebar');
+    const ov = document.getElementById('overlay');
+    const open = sb.classList.toggle('open');
+    ov.classList.toggle('open', open);
+    document.getElementById('ham-icon').className = open ? 'fa fa-xmark' : 'fa fa-bars';
+  }
+  function closeNav() {
+    const sb = document.getElementById('sidebar');
+    if (sb.classList.contains('open')) toggleSidebar();
+  }
+
+  // ── Other Functions
+  function logout() { alert('Logging out...'); 
+
+
+    window.location.href="index.html";
+
+
+  }
+  function openModal(type) { document.getElementById('modal-' + type).classList.add('open'); }
+  function closeModal(type) { document.getElementById('modal-' + type).classList.remove('open'); }
+  function submitModal(type) {
+    closeModal(type);
+    showToast(type === 'add' ? 'Deposit submitted!' : 'Withdrawal requested!');
+  }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── BTC Logic (Keeping your existing logic)
+  let countdownVal = 30;
+  async function fetchBTC(manual = false) {
+    try {
+      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+      const data = await res.json();
+      const price = data.bitcoin.usd;
+      document.getElementById('btc-price').innerHTML = `<span>$</span>${price.toLocaleString()}`;
+      countdownVal = 30;
+    } catch(e) { console.log("Price fetch failed"); }
+  }
+  setInterval(() => {
+    countdownVal--;
+    document.getElementById('cd-fill').style.width = (countdownVal/30*100) + '%';
+    if(countdownVal <= 0) fetchBTC();
+  }, 1000);
+  fetchBTC();
+</script>
+</body>
+
+
+
+</html>

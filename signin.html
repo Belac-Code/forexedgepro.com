@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — ForexEdge Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* ─── Reset & Variables ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #0C1017;
+      --ink-2:      #141B26;
+      --ink-3:      #1C2535;
+      --ink-4:      #202D40;
+      --border:     rgba(255,255,255,0.07);
+      --border-2:   rgba(255,255,255,0.12);
+      --gold:       #C9A84C;
+      --gold-light: #E2C47A;
+      --gold-dim:   rgba(201,168,76,0.10);
+      --blue:       #2D6BE4;
+      --text:       #E8EDF5;
+      --text-2:     #8A95A8;
+      --text-3:     #4E5A6B;
+      --green:      #1DB87A;
+      --red:        #E04A4A;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans:  'DM Sans', system-ui, sans-serif;
+      --radius:     12px;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--ink);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ─── Noise ─────────────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    /* ─── Background Pattern ────────────────────────────────────── */
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .page-bg__glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+    }
+
+    .page-bg__glow--gold {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+      top: -100px; left: -100px;
+    }
+
+    .page-bg__glow--blue {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(45,107,228,0.05) 0%, transparent 70%);
+      bottom: -80px; right: -80px;
+    }
+
+    .page-bg__grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, black 20%, transparent 100%);
+    }
+
+    /* ─── Layout ────────────────────────────────────────────────── */
+    .signin-layout {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── Top Bar ───────────────────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 36px;
+    }
+
+    .topbar__logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .topbar__logo-mark {
+      width: 30px; height: 30px;
+      background: var(--gold);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--ink);
+    }
+
+    .topbar__logo-text {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .topbar__logo-text span { color: var(--gold); }
+
+    .topbar__back {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.8rem;
+      color: var(--text-2);
+      transition: color 0.2s;
+    }
+
+    .topbar__back:hover { color: var(--text); }
+
+    /* ─── Main ──────────────────────────────────────────────────── */
+    .signin-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* ─── Card ──────────────────────────────────────────────────── */
+    .signin-card {
+      width: 100%;
+      max-width: 420px;
+      animation: cardIn 0.5s ease both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .signin-card__header {
+      margin-bottom: 36px;
+    }
+
+    .signin-card__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+
+    .signin-card__eyebrow::before {
+      content: '';
+      width: 18px; height: 1px;
+      background: var(--gold);
+    }
+
+    .signin-card__title {
+      font-family: var(--font-serif);
+      font-size: 2.1rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+
+    .signin-card__subtitle {
+      font-size: 0.875rem;
+      color: var(--text-2);
+      font-weight: 300;
+    }
+
+    /* ─── Form Box ──────────────────────────────────────────────── */
+    .form-box {
+      background: var(--ink-2);
+      border: 1px solid var(--border-2);
+      border-radius: 18px;
+      padding: 36px 32px;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.05) inset,
+        0 24px 48px rgba(0,0,0,0.35);
+    }
+
+    /* ─── Form Fields ───────────────────────────────────────────── */
+    .form-field {
+      margin-bottom: 18px;
+    }
+
+    .form-field:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.775rem;
+      font-weight: 500;
+      color: var(--text-2);
+      margin-bottom: 7px;
+      letter-spacing: 0.03em;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap__icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+      font-size: 0.8rem;
+      pointer-events: none;
+      transition: color 0.2s;
+    }
+
+    .input-wrap__toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+      font-size: 0.78rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+
+    .input-wrap__toggle:hover { color: var(--text-2); }
+
+    .form-input {
+      width: 100%;
+      background: var(--ink-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px 12px 40px;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .form-input::placeholder {
+      color: var(--text-3);
+      font-weight: 300;
+    }
+
+    .form-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+    }
+
+    .form-input:focus + .input-wrap__icon,
+    .input-wrap:focus-within .input-wrap__icon {
+      color: var(--gold);
+    }
+
+    .form-input--error {
+      border-color: var(--red) !important;
+      box-shadow: 0 0 0 3px rgba(224,74,74,0.1) !important;
+    }
+
+    .field-error {
+      font-size: 0.72rem;
+      color: var(--red);
+      margin-top: 5px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .field-error.visible {
+      display: flex;
+    }
+
+    /* ─── Row: Remember + Forgot ────────────────────────────────── */
+    .form-row-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 20px 0 24px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border: 1px solid var(--border-2);
+      border-radius: 4px;
+      background: var(--ink-3);
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .checkbox-label input[type="checkbox"]:checked {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .checkbox-label input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 5px;
+      width: 4px; height: 7px;
+      border: 1.5px solid var(--ink);
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg);
+    }
+
+    .checkbox-label span {
+      font-size: 0.82rem;
+      color: var(--text-2);
+    }
+
+    .forgot-link {
+      font-size: 0.82rem;
+      color: var(--text-2);
+      transition: color 0.2s;
+    }
+
+    .forgot-link:hover { color: var(--gold); }
+
+    /* ─── Submit Button ─────────────────────────────────────────── */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--gold);
+      color: var(--ink);
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-submit:hover {
+      background: var(--gold-light);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(201,168,76,0.22);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-submit__spinner {
+      display: none;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(12,16,23,0.3);
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Divider ───────────────────────────────────────────────── */
+    .form-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .form-divider::before,
+    .form-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .form-divider span {
+      font-size: 0.72rem;
+      color: var(--text-3);
+      white-space: nowrap;
+    }
+
+    /* ─── Alert Banner ──────────────────────────────────────────── */
+    .form-alert {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .form-alert.visible { display: flex; }
+
+    .form-alert--error {
+      background: rgba(224,74,74,0.08);
+      border: 1px solid rgba(224,74,74,0.2);
+      color: var(--red);
+    }
+
+    .form-alert--success {
+      background: rgba(29,184,122,0.08);
+      border: 1px solid rgba(29,184,122,0.2);
+      color: var(--green);
+    }
+
+    /* ─── Trust Strip ───────────────────────────────────────────── */
+    .trust-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--text-3);
+    }
+
+    .trust-item i {
+      font-size: 0.7rem;
+      color: var(--text-3);
+    }
+
+    /* ─── Footer ────────────────────────────────────────────────── */
+    .signin-footer {
+      text-align: center;
+      padding: 20px 24px 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .signin-footer p {
+      font-size: 0.75rem;
+      color: var(--text-3);
+    }
+
+    .signin-footer a {
+      color: var(--text-2);
+      transition: color 0.2s;
+    }
+
+    .signin-footer a:hover { color: var(--gold); }
+
+    /* ─── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .topbar { padding: 20px 20px; }
+      .form-box { padding: 28px 20px; }
+      .signin-card__title { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background -->
+  <div class="page-bg">
+    <div class="page-bg__glow page-bg__glow--gold"></div>
+    <div class="page-bg__glow page-bg__glow--blue"></div>
+    <div class="page-bg__grid"></div>
+  </div>
+
+  <div class="signin-layout">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+      <a href="index.html" class="topbar__logo">
+        <div class="topbar__logo-mark" style="font-weight: bolder;">FXP</i></div>
+        <span class="topbar__logo-text">ForexEdge <span>Pro</span></span>
+      </a>
+      <a href="index.html" class="topbar__back">
+        <i class="fas fa-arrow-left"></i> Back to site
+      </a>
+    </div>
+
+    <!-- Main -->
+    <main class="signin-main">
+      <div class="signin-card">
+
+        <div class="signin-card__header">
+          <div class="signin-card__eyebrow">Trader Portal</div>
+          <h1 class="signin-card__title">Welcome back.</h1>
+          <p class="signin-card__subtitle">Sign in to your ForexEdge Pro account to access your dashboard.</p>
+        </div>
+
+        <div class="form-box">
+
+          <!-- Alert -->
+          <div class="form-alert form-alert--error" id="formAlert">
+            <i class="fas fa-circle-exclamation"></i>
+            <span id="alertText">Invalid email or password. Please try again.</span>
+          </div>
+
+          <!-- Email -->
+          <div class="form-field">
+            <label class="form-label" for="email">Email address</label>
+            <div class="input-wrap">
+              <input
+                class="form-input"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                spellcheck="false"
+              />
+              <span class="input-wrap__icon"><i class="fas fa-envelope"></i></span>
+            </div>
+            <div class="field-error" id="emailError">
+              <i class="fas fa-circle-exclamation"></i> Please enter a valid email address.
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-field">
+            <label class="form-label" for="password">Password</label>
+            <div class="input-wrap">
+              <input
+                class="form-input"
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+              />
+              <span class="input-wrap__icon"><i class="fas fa-lock"></i></span>
+              <button class="input-wrap__toggle" type="button" id="passwordToggle" aria-label="Toggle password visibility">
+                <i class="fas fa-eye" id="toggleIcon"></i>
+              </button>
+            </div>
+            <div class="field-error" id="passwordError">
+              <i class="fas fa-circle-exclamation"></i> Password is required.
+            </div>
+          </div>
+
+          <!-- Remember + Forgot -->
+          <div class="form-row-meta">
+            <label class="checkbox-label">
+              <input type="checkbox" id="rememberMe" />
+              <span>Remember me</span>
+            </label>
+            <a href="#" class="forgot-link" id="forgotLink">Forgot password?</a>
+          </div>
+
+          <!-- Submit -->
+          <button class="btn-submit" id="submitBtn" type="button">
+            <span id="btnText">Sign In</span>
+            <span class="btn-submit__spinner" id="btnSpinner"></span>
+            <i class="fas fa-arrow-right" id="btnIcon"></i>
+          </button>
+
+          <!-- Divider -->
+          <div class="form-divider">
+            <span>Secured by ForexEdge Pro</span>
+          </div>
+
+          <!-- Trust -->
+          <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
+            <div class="trust-item"><i class="fas fa-shield-halved"></i> 256-bit SSL</div>
+            <div class="trust-item"><i class="fas fa-lock"></i> 2FA Ready</div>
+            <div class="trust-item"><i class="fas fa-user-shield"></i> KYC Verified</div>
+          </div>
+
+        </div>
+
+        <!-- Trust strip -->
+        <div class="trust-strip">
+          <div class="trust-item"><i class="fas fa-circle-check"></i> No account? Contact support</div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="signin-footer">
+      <p>
+        © 2025 ForexEdge Pro &nbsp;·&nbsp;
+        <a href="#">Terms</a> &nbsp;·&nbsp;
+        <a href="#">Privacy</a> &nbsp;·&nbsp;
+        <a href="#">Support</a>
+      </p>
+    </footer>
+
+  </div>
+
+  <script>
+    // ─── Password visibility toggle ────────────────────────────────
+    const passwordInput = document.getElementById('password');
+    const toggleBtn     = document.getElementById('passwordToggle');
+    const toggleIcon    = document.getElementById('toggleIcon');
+
+    toggleBtn.addEventListener('click', () => {
+      const isHidden = passwordInput.type === 'password';
+      passwordInput.type = isHidden ? 'text' : 'password';
+      toggleIcon.className = isHidden ? 'fas fa-eye-slash' : 'fas fa-eye';
+    });
+
+    // ─── Inline validation ─────────────────────────────────────────
+    const emailInput    = document.getElementById('email');
+    const emailError    = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+
+    function validateEmail(val) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+    }
+
+    emailInput.addEventListener('blur', () => {
+      const val = emailInput.value.trim();
+      if (val && !validateEmail(val)) {
+        emailInput.classList.add('form-input--error');
+        emailError.classList.add('visible');
+      } else {
+        emailInput.classList.remove('form-input--error');
+        emailError.classList.remove('visible');
+      }
+    });
+
+    emailInput.addEventListener('input', () => {
+      emailInput.classList.remove('form-input--error');
+      emailError.classList.remove('visible');
+      document.getElementById('formAlert').classList.remove('visible');
+    });
+
+    passwordInput.addEventListener('input', () => {
+      passwordInput.classList.remove('form-input--error');
+      passwordError.classList.remove('visible');
+      document.getElementById('formAlert').classList.remove('visible');
+    });
+
+    // ─── Forgot password ───────────────────────────────────────────
+    document.getElementById('forgotLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      const alert = document.getElementById('formAlert');
+      const alertText = document.getElementById('alertText');
+      alert.className = 'form-alert form-alert--success visible';
+      alertText.textContent = 'Password reset instructions sent to your email address.';
+    });
+
+    // ─── Form submission ───────────────────────────────────────────
+    document.getElementById('submitBtn').addEventListener('click', () => {
+      const email    = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      const alert    = document.getElementById('formAlert');
+      const alertText = document.getElementById('alertText');
+
+      let valid = true;
+
+      // Reset
+      alert.classList.remove('visible');
+      emailInput.classList.remove('form-input--error');
+      passwordInput.classList.remove('form-input--error');
+      emailError.classList.remove('visible');
+      passwordError.classList.remove('visible');
+
+      if (!email || !validateEmail(email)) {
+        emailInput.classList.add('form-input--error');
+        emailError.classList.add('visible');
+        valid = false;
+      }
+
+      if (!password) {
+        passwordInput.classList.add('form-input--error');
+        passwordError.classList.add('visible');
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      // Show loading state
+      const btn        = document.getElementById('submitBtn');
+      const btnText    = document.getElementById('btnText');
+      const btnSpinner = document.getElementById('btnSpinner');
+      const btnIcon    = document.getElementById('btnIcon');
+
+      btn.disabled = true;
+      btnText.textContent = 'Signing in…';
+      btnSpinner.style.display = 'block';
+      btnIcon.style.display = 'none';
+
+      // Simulate auth
+      setTimeout(() => {
+        btn.disabled = false;
+        btnText.textContent = 'Sign In';
+        btnSpinner.style.display = 'none';
+        btnIcon.style.display = 'block';
+
+        // Demo: treat trader@forexedge.com / password as valid
+        if (email === 'trader@forexedge.com' && password === 'password') {
+          alert.className = 'form-alert form-alert--success visible';
+          alertText.textContent = 'Login successful. Redirecting to your dashboard…';
+          setTimeout(() => {
+            window.location.href = 'EDITABLE NPF BROKER.html';
+          }, 1200);
+        } else {
+          alert.className = 'form-alert form-alert--error visible';
+          alertText.textContent = 'Invalid email or password. Use trader@forexedge.com / password to demo.';
+          emailInput.classList.add('form-input--error');
+          passwordInput.classList.add('form-input--error');
+        }
+      }, 1800);
+    });
+
+    // ─── Enter key support ─────────────────────────────────────────
+    [emailInput, passwordInput].forEach(el => {
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('submitBtn').click();
+      });
+    });
+  </script>
+</body>
+</html>
