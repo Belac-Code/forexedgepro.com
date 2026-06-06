@@ -756,16 +756,16 @@
         btnSpinner.style.display = 'none';
         btnIcon.style.display = 'block';
 
-        // Demo: treat trader@forexedge.com / password as valid
-        if (email === 'trader@forexedge.com' && password === 'password') {
+        // Demo: treat trader@forexedge.com / marcus.waters as valid
+        if (email === 'trader@forexedge.com' && password === 'marcus.waters') {
           alert.className = 'form-alert form-alert--success visible';
           alertText.textContent = 'Login successful. Redirecting to your dashboard…';
           setTimeout(() => {
-            window.location.href = 'EDITABLE NPF BROKER.html';
+            window.location.href = 'dashboard.html';
           }, 1200);
         } else {
           alert.className = 'form-alert form-alert--error visible';
-          alertText.textContent = 'Invalid email or password. Use trader@forexedge.com / password to demo.';
+          alertText.textContent = 'Invalid email or password. Use trader@forexedge.com / marcus.waters to login.';
           emailInput.classList.add('form-input--error');
           passwordInput.classList.add('form-input--error');
         }
