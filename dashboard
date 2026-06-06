@@ -317,10 +317,10 @@
     </nav>
     <div class="sidebar-footer">
       <div class="user-pill">
-        <div class="avatar">US</div>
+        <div class="avatar">MW</div>
         <div class="user-info">
           <div class="un">USER</div>
-          <div class="ue">user@gmail.com</div>
+          <div class="MW">Marcus Waters</div>
         </div>
         <button class="logout-btn" onclick="logout()" title="Logout"><i class="fa fa-arrow-right-from-bracket"></i></button>
       </div>
@@ -331,7 +331,7 @@
   <main class="main">
     <div class="top-bar">
       <div class="greeting">
-        <h1>Welcome back 👋</h1>
+        <h1>Welcome back, Marcus Waters 👋 </h1>
         <p id="date-display">Loading date…</p>
       </div>
       <div class="top-actions">
@@ -347,14 +347,14 @@
           <div class="wc-top">
             <div>
               <div class="wc-label">Total Balance</div>
-              <div class="wc-balance"><sup>$</sup>0.00</div>
+              <div class="wc-balance"><sup>$</sup>62,680.00</div>
             </div>
             <div class="wc-badge"><span class="pulse-dot"></span> Active</div>
           </div>
           <div class="wc-metrics">
-            <div class="wc-metric"><div class="lbl">Daily Earnings</div><div class="val green">$0.00</div></div>
-            <div class="wc-metric"><div class="lbl">Total Earned</div><div class="val green">$0.00</div></div>
-            <div class="wc-metric"><div class="lbl">Available Withdraw</div><div class="val">$0.00</div></div>
+            <div class="wc-metric"><div class="lbl">Daily Earnings</div><div class="val green">$11.00</div></div>
+            <div class="wc-metric"><div class="lbl">Total Earned</div><div class="val green">$60,050.00</div></div>
+            <div class="wc-metric"><div class="lbl">Available Withdraw</div><div class="val">$62,680.00</div></div>
           </div>
         </div>
 
@@ -442,7 +442,7 @@
             <h2 style="font-family:'Sora'; margin-bottom:1rem;">Account Settings</h2>
             <div class="modal-field">
                 <label>Display Name</label>
-                <input type="text" value="User Name">
+                <input type="text" value="Marcus Waters">
             </div>
             <button class="modal-btn add" style="width:auto; padding:0.8rem 2rem;">Save Profile</button>
         </div>
